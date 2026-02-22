@@ -1,0 +1,91 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# OpenRouter – docker-compose
+#
+# Services:
+#   postgres          – PostgreSQL 16
+#   primary-backend   – Elysia auth/main API  (port 3000)
+#   api-backend       – Elysia AI proxy API   (port 4000)
+#   dashboard-frontend– React dashboard       (port 3001)
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+  # ── Database ────────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: openrouter_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-openrouter}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-openrouter_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-openrouterdb}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-openrouter} -d ${POSTGRES_DB:-openrouterdb}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Primary Backend ──────────────────────────────────────────────────────────
+  primary-backend:
+    container_name: openrouter_primary_backend
+    image: sujaljain989/openrouter-primary-backend:latest
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-openrouter}:${POSTGRES_PASSWORD:-openrouter_secret}@postgres:5432/${POSTGRES_DB:-openrouterdb}
+      JWT_SECRET: ${JWT_SECRET:-changeme_jwt_secret_32chars_min}
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -qO- http://localhost:3000/ || exit 1" ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  # ── AI API Backend ───────────────────────────────────────────────────────────
+  api-backend:
+    container_name: openrouter_api_backend
+    image: sujaljain989/openrouter-api-backend:latest
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-openrouter}:${POSTGRES_PASSWORD:-openrouter_secret}@postgres:5432/${POSTGRES_DB:-openrouterdb}
+      # ── LLM Provider API Keys (set in .env) ──
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY}
+    ports:
+      - "4000:4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -qO- http://localhost:4000/ || exit 1" ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  # ── Dashboard Frontend ────────────────────────────────────────────────────────
+  dashboard-frontend:
+    container_name: openrouter_dashboard
+    image: sujaljain989/openrouter-dashboard-frontend:latest
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      # These are baked in at build time by Bun; override if your app reads them at runtime
+      VITE_PRIMARY_BACKEND_URL: ${PRIMARY_BACKEND_URL:-http://localhost:3000}
+      VITE_API_BACKEND_URL: ${API_BACKEND_URL:-http://localhost:4000}
+    ports:
+      - "3001:3001"
+    depends_on:
+      - primary-backend
+      - api-backend
+
+volumes:
+  postgres_data:

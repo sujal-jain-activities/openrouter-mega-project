@@ -1,0 +1,31 @@
+# ── VCS ──────────────────────────────────────────────────────────────────────
+.git
+.gitignore
+
+# ── Dependencies (Docker installs these inside the image) ─────────────────────
+node_modules
+**/node_modules
+
+# ── Build artefacts ───────────────────────────────────────────────────────────
+**/dist
+**/.next
+**/build
+
+# ── Env files (keep secrets out of the image) ─────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Editor / OS noise ─────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.vscode
+.idea
+.cursor
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
+*.log
+logs/
+
+# ── Turbo cache ───────────────────────────────────────────────────────────────
+.turbo

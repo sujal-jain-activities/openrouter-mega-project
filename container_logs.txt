@@ -1,0 +1,10 @@
+openrouter_primary_backend  | Loaded Prisma config from prisma.config.ts.
+openrouter_primary_backend  | 
+openrouter_primary_backend  | Prisma schema loaded from prisma/schema.prisma.
+openrouter_primary_backend  | Datasource "db": PostgreSQL database "openrouterdb", schema "public" at "postgres:5432"
+openrouter_primary_backend  | 
+openrouter_primary_backend  | 2 migrations found in prisma/migrations
+openrouter_primary_backend  | 
+openrouter_primary_backend  | 
+openrouter_primary_backend  | No pending migrations to apply.
+openrouter_api_backend      | 🦊 Elysia is running at 0.0.0.0:4000
