@@ -1,0 +1,45 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: dashboard-frontend
+  namespace: openrouter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dashboard-frontend
+  template:
+    metadata:
+      labels:
+        app: dashboard-frontend
+    spec:
+      containers:
+        - name: dashboard-frontend
+          image: sujaljain989/openrouter-dashboard-frontend:latest
+          ports:
+            - containerPort: 3001
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+          env:
+            - name: NODE_ENV
+              value: production
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: dashboard-frontend
+  namespace: openrouter
+spec:
+  selector:
+    app: dashboard-frontend
+  ports:
+    - protocol: TCP
+      port: 3001
+      targetPort: 3001
+  type: ClusterIP

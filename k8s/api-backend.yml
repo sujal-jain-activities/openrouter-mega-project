@@ -1,0 +1,53 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: api-backend
+  namespace: openrouter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-backend
+  template:
+    metadata:
+      labels:
+        app: api-backend
+    spec:
+      containers:
+        - name: api-backend
+          image: sujaljain989/openrouter-api-backend:latest
+          ports:
+            - containerPort: 4000
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+          env:
+            - name: DATABASE_URL
+              value: postgresql://openrouter:openrouter_secret@postgres:5432/openrouterdb?schema=public
+            - name: OPENAI_API_KEY
+              value: sk-...
+            - name: ANTHROPIC_API_KEY
+              value: sk-ant-...
+            - name: GOOGLE_API_KEY
+              value: AIza...
+            - name: NODE_ENV
+              value: production
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: api-backend
+  namespace: openrouter
+spec:
+  selector:
+    app: api-backend
+  ports:
+    - protocol: TCP
+      port: 4000
+      targetPort: 4000
+  type: ClusterIP

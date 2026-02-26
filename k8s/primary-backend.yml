@@ -1,0 +1,52 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: primary-backend
+  namespace: openrouter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: primary-backend
+  template:
+    metadata:
+      labels:
+        app: primary-backend
+    spec:
+      containers:
+        - name: primary-backend
+          image: sujaljain989/openrouter-primary-backend:latest
+          ports:
+            - containerPort: 3000
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+          env:
+            - name: DATABASE_URL
+              value: postgresql://openrouter:openrouter_secret@postgres:5432/openrouterdb?schema=public
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: openrouter-secret
+                  key: JWT_SECRET
+            - name: NODE_ENV
+              value: production
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: primary-backend
+  namespace: openrouter
+spec:
+  selector:
+    app: primary-backend
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+  type: ClusterIP
