@@ -2,7 +2,7 @@ name: Deploy to Docker Hub
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build-and-push:
@@ -23,20 +23,23 @@ jobs:
       - name: Build and push primary-backend
         uses: docker/build-push-action@v6
         with:
-          context: ./apps/primary-backend
+          context: .
+          file: ./apps/primary-backend/Dockerfile
           push: true
           tags: sujaljain989/openrouter-primary-backend:latest
 
       - name: Build and push api-backend
         uses: docker/build-push-action@v6
         with:
-          context: ./apps/api-backend
+          context: .
+          file: ./apps/api-backend/Dockerfile
           push: true
           tags: sujaljain989/openrouter-api-backend:latest
 
       - name: Build and push dashboard-frontend
         uses: docker/build-push-action@v6
         with:
-          context: ./apps/dashboard-frontend
+          context: .
+          file: ./apps/dashboard-frontend/Dockerfile
           push: true
           tags: sujaljain989/openrouter-dashboard-frontend:latest
