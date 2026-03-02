@@ -23,20 +23,20 @@ jobs:
       - name: Build and push primary-backend
         uses: docker/build-push-action@v6
         with:
-          context: ./primary-backend
+          context: ./apps/primary-backend
           push: true
           tags: sujaljain989/openrouter-primary-backend:latest
 
       - name: Build and push api-backend
         uses: docker/build-push-action@v6
         with:
-          context: ./api-backend
+          context: ./apps/api-backend
           push: true
           tags: sujaljain989/openrouter-api-backend:latest
 
       - name: Build and push dashboard-frontend
         uses: docker/build-push-action@v6
         with:
-          context: ./dashboard-frontend
+          context: ./apps/dashboard-frontend
           push: true
           tags: sujaljain989/openrouter-dashboard-frontend:latest
